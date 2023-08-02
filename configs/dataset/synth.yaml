@@ -1,0 +1,4 @@
+# @package _global_
+data:
+  train_dir: synth
+  num_workers: 16
