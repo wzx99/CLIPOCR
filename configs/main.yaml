@@ -18,7 +18,7 @@ model:
 
 data:
   _target_: strhub.data.module.SceneTextDataModule
-  root_dir: /gdata2/wangzx/text_recognition_datasets/data
+  root_dir: path/to/data
   train_dir: ???
   batch_size: ${model.batch_size}
   img_size: ${model.img_size}
@@ -41,7 +41,7 @@ trainer:
 ckpt_path: null
 pretrained: null
 
-ckpt_root: /gdata2/wangzx/text_recognition_ckpt
+ckpt_root: path/to/ckpt
 ckpt_name: _
 
 hydra:

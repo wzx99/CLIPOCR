@@ -252,7 +252,8 @@ class CLIPOCR(BaseSeq):
 
         named_apply(partial(init_weights, exclude=['encoder']), self)
 
-        self.clip = clip.load("/gdata1/wangzx/pretrained_models/clip/ViT-B-16.pt", device='cpu')
+        self.clip = clip.load("ViT-B/16", device='cpu')
+        # self.clip = clip.load("path/to/ViT-B-16.pt", device='cpu')
         positional_embedding = self.clip.visual.positional_embedding.data
         assert positional_embedding.shape[0] == 14 * 14 + 1
         positional_embedding = torch.cat((positional_embedding[:8 + 1], positional_embedding[14 + 1:22 + 1]), dim=0)
@@ -315,10 +316,10 @@ class CLIPOCR(BaseSeq):
         logits = self.head(out_list[-1]).flatten(end_dim=1)
         loss_char = F.cross_entropy(logits, tgt_out.flatten(), ignore_index=self.pad_id)
 
-        print('loss_char:{}'.format(loss_char.data),
-              'loss_word:{}'.format(loss_word.data),
-              'loss_align:{}'.format(loss_align.data),
-              'loss_align_vis:{}'.format(loss_align_vis))
+        # print('loss_char:{}'.format(loss_char.data),
+        #       'loss_word:{}'.format(loss_word.data),
+        #       'loss_align:{}'.format(loss_align.data),
+        #       'loss_align_vis:{}'.format(loss_align_vis))
         loss = loss_char + loss_word + loss_align + loss_align_vis
         self.log('loss', loss)
         return loss
@@ -327,37 +328,7 @@ class CLIPOCR(BaseSeq):
 def LCL(image_features, text_features, cons_weight=0.1, l1_weight=5.0, tau=0.03):
     image_features = image_features / (image_features.norm(dim=-1, keepdim=True)+1e-7)
     text_features = text_features / (text_features.norm(dim=-1, keepdim=True)+1e-7)
-    # if dist.is_initialized():
-    #     world_size = dist.get_world_size()
-    #     rank = dist.get_rank()
-    #
-    #     # We gather tensors from all gpus to get more negatives to contrast with.
-    #     # gathered_image_features = [
-    #     #     torch.zeros_like(image_features) for _ in range(world_size)
-    #     # ]
-    #     gathered_text_features = [
-    #         torch.zeros_like(text_features) for _ in range(world_size)
-    #     ]
-    #
-    #     # dist.all_gather(gathered_image_features, image_features)
-    #     dist.all_gather(gathered_text_features, text_features)
-    #
-    #     # all_image_features = torch.cat(
-    #     #     [image_features]
-    #     #     + gathered_image_features[:rank]
-    #     #     + gathered_image_features[rank + 1 :]
-    #     # )
-    #     all_image_features = image_features
-    #     all_text_features = torch.cat(
-    #         [text_features]
-    #         + gathered_text_features[:rank]
-    #         + gathered_text_features[rank + 1 :]
-    #     )
-    #
-    #     # this is needed to send gradients back everywhere.
-    #     logits_per_image = all_image_features @ all_text_features.t().detach()
-    # else:
-    #     logits_per_image = image_features @ text_features.t()
+    
     logits_per_image = image_features @ text_features.t()
 
     ground_truth = torch.arange(len(logits_per_image)).long().to(logits_per_image.device)

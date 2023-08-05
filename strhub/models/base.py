@@ -93,6 +93,7 @@ class BaseSystem(pl.LightningModule, ABC):
         optim = create_optimizer_v2(self, 'adamw', lr, self.weight_decay)
         sched = OneCycleLR(optim, lr, self.trainer.estimated_stepping_batches, pct_start=self.warmup_pct,
                            cycle_momentum=False)
+        print('estimated_stepping_batches:{}'.format(self.trainer.estimated_stepping_batches))
         return {'optimizer': optim, 'lr_scheduler': {'scheduler': sched, 'interval': 'step'}}
 
     def optimizer_zero_grad(self, epoch: int, batch_idx: int, optimizer: Optimizer, optimizer_idx: int):

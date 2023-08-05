@@ -105,8 +105,6 @@ def main():
 
         if args.test_set=='base':
             test_set = SceneTextDataModule.TEST_BENCHMARK_SUB + SceneTextDataModule.TEST_BENCHMARK
-        elif args.test_set=='ost':
-            test_set = SceneTextDataModule.TEST_OST
         elif args.test_set=='new':
             test_set = SceneTextDataModule.TEST_NEW
         test_set = sorted(set(test_set))
