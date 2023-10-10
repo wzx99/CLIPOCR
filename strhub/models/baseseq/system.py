@@ -328,8 +328,31 @@ class CLIPOCR(BaseSeq):
 def LCL(image_features, text_features, cons_weight=0.1, l1_weight=5.0, tau=0.03):
     image_features = image_features / (image_features.norm(dim=-1, keepdim=True)+1e-7)
     text_features = text_features / (text_features.norm(dim=-1, keepdim=True)+1e-7)
-    
-    logits_per_image = image_features @ text_features.t()
+    if dist.is_initialized():
+        world_size = dist.get_world_size()
+        rank = dist.get_rank()
+
+        length = torch.tensor(text_features.shape[0],device=text_features.device)
+        gathered_length = [torch.zeros_like(length) for _ in range(world_size) ]
+        dist.all_gather(gathered_length, length)
+        max_length = max(gathered_length).item()
+
+        extend_text_features = torch.zeros((max_length,text_features.shape[1]),device=text_features.device)
+        extend_text_features[:text_features.shape[0]] += text_features
+        gathered_text_features = [
+             torch.zeros_like(extend_text_features) for _ in range(world_size)
+        ]
+        dist.all_gather(gathered_text_features, extend_text_features)
+        gathered_text_features = [gathered_text_features[i][:l.item()] for i, l in enumerate(gathered_length)]
+
+        all_text_features = torch.cat(
+            [text_features]
+            + gathered_text_features[:rank]
+            + gathered_text_features[rank + 1 :]
+        )
+        logits_per_image = image_features @ all_text_features.t()
+    else:
+        logits_per_image = image_features @ text_features.t()
 
     ground_truth = torch.arange(len(logits_per_image)).long().to(logits_per_image.device)
 
