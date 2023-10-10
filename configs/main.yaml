@@ -18,7 +18,7 @@ model:
 
 data:
   _target_: strhub.data.module.SceneTextDataModule
-  root_dir: path/to/data
+  root_dir: data
   train_dir: ???
   batch_size: ${model.batch_size}
   img_size: ${model.img_size}
@@ -41,7 +41,7 @@ trainer:
 ckpt_path: null
 pretrained: null
 
-ckpt_root: path/to/ckpt
+ckpt_root: ckpt
 ckpt_name: _
 
 hydra:
