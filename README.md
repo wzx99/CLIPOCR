@@ -47,7 +47,7 @@ python train.py trainer.gpus=2 ckpt_name=clipocr_synth dataset=synth model=clipo
 ```
 
 ## Testing
-
+Pretrained model is available in [here](https://drive.google.com/drive/folders/1IYmXlwFrnpgizioGd7l_pk4zlMEgK1_U?usp=share_link).
 ```bash
 python test.py ckpt/clipocr_synth/run/checkpoints --data_root data
 ```
